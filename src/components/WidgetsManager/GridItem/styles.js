@@ -18,9 +18,11 @@ export const Title = styled.span`
   font-weight: bold;
 `;
 export const Actions = styled.span`
-    & > * {
-        cursor: pointer;
-    }
+  display: flex;
+  & > * {
+    margin-right: .5em;
+    cursor: pointer;
+  }
 `;
 export const Content = styled.div`
   flex: 1;

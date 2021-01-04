@@ -6,6 +6,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { Wrapper } from "./styles";
 import GridItem from "./GridItem/GridItem";
+import NoWidgets from "./NoWidgets/NoWidgets";
 
 const ResponsiveReactGridLayout = WidthProvider(GridLayout);
 
@@ -25,7 +26,8 @@ const useLayout = (name, layout) => {
   const updateLayout = (layout) => {
     console.log("updating layout: ", layout);
     localStorage.setItem(layoutName, JSON.stringify(layout));
-    setLayoutState(layout);
+    setLayoutState(layout.map((l) => ({ ...l })));
+    //setLayoutState(layout);
   };
 
   return [layoutState, updateLayout];
@@ -46,6 +48,7 @@ const WidgetsManager = ({ children, ...props }) => {
   const [fullScreen, setFullscreen] = useState(null);
   const prevStateLayout = usePrev(layoutState);
   const prevLayout = usePrev(layout);
+  const renders = useRef(1);
 
   const onLayoutChange = (layout) => {
     if (!prevStateLayout || fullScreen !== null) return;
@@ -77,64 +80,69 @@ const WidgetsManager = ({ children, ...props }) => {
     setFullscreen(value);
   };
 
+  const removeItem = (key) => {
+    props.removeItem(key);
+  };
+
   useEffect(() => {
     console.log(layout, layoutState, prevLayout);
     prevLayout !== null && layout && setLayoutState(layout);
+    setFullscreen(null);
   }, [layout]);
 
   useEffect(() => {
     console.log("Fullscreen changed to: ", fullScreen);
   }, [fullScreen]);
 
+  useEffect(() => {
+    renders.current++;
+  });
+
+  const getGridItem = (child, key) => {
+    console.log(child, key);
+    return (
+      <div key={key} className="grid-item-container">
+        <GridItem
+          key={key}
+          title={child.props.title}
+          actions={child.props.actions}
+          setFullscreen={() => toggleFullscreen(key)}
+          removeItem={() => removeItem(key)}
+        >
+          {child}
+        </GridItem>
+      </div>
+    );
+  };
   const augmentedLayout = useMemo(() => {
-    console.log("calculating");
-    const filtered = layoutState.filter((item) =>
+    console.log("calculating layout: ", layout, layoutState);
+    const filtered = layout.filter((item) =>
       fullScreen !== null ? item.i === fullScreen : true
     );
 
-    console.log('Maximized: ', filtered);
-
     if (fullScreen) {
+      console.log("Maximized: ", filtered);
       return [{ ...filtered[0], x: 0, y: 0, w: 12, h: 6 }];
     }
 
     return filtered;
-  }, [fullScreen]);
+  }, [fullScreen, layout]);
 
   const filteredChildren = useMemo(() => {
-    console.log("calculating");
+    console.log("calculating children: ", children, augmentedLayout);
     if (fullScreen !== null) {
       const key = augmentedLayout[0].i;
-      const child = children.find(child => child.key === key);
-      return (
-        <div key={key} className="grid-item-container">
-          <GridItem
-            title={child.props.title}
-            actions={child.props.actions}
-            setFullscreen={() => toggleFullscreen(key)}
-          >
-            {child}
-          </GridItem>
-        </div>
-      );
+      const child = children.find((child) => child.key === key);
+      return [getGridItem(child, key)];
     }
     return children.map((child, idx) => {
       const key = augmentedLayout[idx].i;
-      return (
-        <div key={key} className="grid-item-container">
-          <GridItem
-            title={child.props.title}
-            actions={child.props.actions}
-            setFullscreen={() => toggleFullscreen(key)}
-          >
-            {child}
-          </GridItem>
-        </div>
-      );
+      return getGridItem(child, key);
     });
-  }, [fullScreen]);
+  }, [fullScreen, layout]);
 
-  console.log("Fullscreen now: ", fullScreen);
+  console.log("Renders: ", renders.current);
+  console.log('children: ', filteredChildren.length);
 
   return (
     <Wrapper>
@@ -149,6 +157,7 @@ const WidgetsManager = ({ children, ...props }) => {
       >
         {filteredChildren}
       </ResponsiveReactGridLayout>
+      {!filteredChildren.length && <NoWidgets />}
     </Wrapper>
   );
 };

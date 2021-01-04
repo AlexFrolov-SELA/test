@@ -1,10 +1,20 @@
 import "./App.css";
 import WidgetsManager from "./components/WidgetsManager/WidgetsManager";
 import { map, range } from "lodash";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const MockComponent = (props) => {
-  return <div>{props.name || props.children}</div>;
+  const renders = useRef(1);
+
+  useEffect(() => {
+    renders.current++;
+  });
+  return (
+    <div>
+      <div>{props.name || props.children}</div>
+      <div>Renders: {renders.current}</div>
+    </div>
+  );
 };
 
 const getLayout = () => {
@@ -36,7 +46,7 @@ function App() {
         title={`Component ${layout.i}`}
         actions={[]}
       >
-        <span>Component {layout.i}</span>
+        <span>Widget {layout.i}</span>
       </MockComponent>
     ),
     [layout]
@@ -71,6 +81,13 @@ function App() {
     setLayout(getLayout());
   };
 
+  const removeItem = (key) => {
+    console.log(`removing: ${key} from `, layout);
+    const newLayout = layout.filter(l => l.i !== key.toString());
+    console.log('new layout: ', newLayout);
+    setLayout(newLayout);
+  };
+
   return (
     <div className="App">
       <label>{increment ? "Increment" : "Decrement"}</label>
@@ -91,7 +108,11 @@ function App() {
       <button onClick={changeLayoutX}>Change X</button>
       <button onClick={changeLayoutWidth}>Change W</button>
       <button onClick={resetLayout}>Reset Layout</button>
-      <WidgetsManager name="WidgetsManager-1" layout={layout}>
+      <WidgetsManager
+        name="WidgetsManager-1"
+        layout={layout}
+        removeItem={removeItem}
+      >
         {layout.map((l) => getWidget(l))}
       </WidgetsManager>
     </div>
