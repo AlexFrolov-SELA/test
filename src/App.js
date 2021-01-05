@@ -1,7 +1,9 @@
-import "./App.css";
-import WidgetsManager from "./components/WidgetsManager/WidgetsManager";
-import { map, range } from "lodash";
-import { useCallback, useEffect, useRef, useState } from "react";
+import './App.css';
+import WidgetsManager from './components/WidgetsManager/WidgetsManager';
+import { map, range } from 'lodash';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import GridItem from './components/WidgetsManager/GridItem/GridItem';
+import config from './config';
 
 const MockComponent = (props) => {
   const renders = useRef(1);
@@ -33,6 +35,14 @@ const getLayout = () => {
     };
   });
 };
+
+/**
+ * CONFIG STRUCTURE:
+ *
+ *  {
+ *
+ *  }
+ */
 
 function App() {
   const [layout, setLayout] = useState(getLayout());
@@ -83,16 +93,16 @@ function App() {
 
   const removeItem = (key) => {
     console.log(`removing: ${key} from `, layout);
-    const newLayout = layout.filter(l => l.i !== key.toString());
+    const newLayout = layout.filter((l) => l.i !== key.toString());
     console.log('new layout: ', newLayout);
     setLayout(newLayout);
   };
 
   return (
-    <div className="App">
-      <label>{increment ? "Increment" : "Decrement"}</label>
+    <div className='App'>
+      <label>{increment ? 'Increment' : 'Decrement'}</label>
       <input
-        type="checkbox"
+        type='checkbox'
         checked={increment}
         onChange={() => setIncrement(!increment)}
       />
@@ -109,11 +119,15 @@ function App() {
       <button onClick={changeLayoutWidth}>Change W</button>
       <button onClick={resetLayout}>Reset Layout</button>
       <WidgetsManager
-        name="WidgetsManager-1"
+        name='WidgetsManager-1'
         layout={layout}
         removeItem={removeItem}
+        config={config}
       >
-        {layout.map((l) => getWidget(l))}
+        {/* {layout.map((l) => getWidget(l))} */}
+        {/* <GridItem>
+          <Component />
+        </GridItem> */}
       </WidgetsManager>
     </div>
   );
