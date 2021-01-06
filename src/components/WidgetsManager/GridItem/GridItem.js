@@ -27,7 +27,7 @@ const GridItem = (props) => {
   ];
 
   const Component = useMemo(() => {
-    return React.lazy(() => import(`./../../../${componentName}`));
+    return React.lazy(() => import(`components/${componentName}`));
   }, [componentName]);
 
   return (

@@ -10,7 +10,7 @@ export default {
   widgets: [
     {
       title: 'Cyber Threats Detected Over Time',
-      componentName: 'components/MockComponent',
+      componentName: 'MockComponent',
       action: 'getCyberThreatsOverTime',
       display: true,
       flags: {
@@ -55,7 +55,7 @@ export default {
     },
     {
       title: 'Rick Sanches whereabouts',
-      componentName: 'components/RickLocator',
+      componentName: 'RickLocator',
       action: 'getRickSanchezLocation',
       display: true,
       flags: {
@@ -100,7 +100,7 @@ export default {
     },
     {
       title: 'Rick Sanches whereabouts - 2',
-      componentName: 'components/RickLocator',
+      componentName: 'RickLocator',
       action: 'getRickSanchezLocation',
       display: true,
       flags: {
