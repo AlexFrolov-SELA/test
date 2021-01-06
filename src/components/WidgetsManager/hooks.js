@@ -1,40 +1,49 @@
 import { useEffect, useRef, useState } from 'react';
+import { areObjectArraysEqual } from './helpers';
+
+const saveToLs = (name, data) => {
+  //console.log('Saving layout to LS: ', data);
+  localStorage.setItem(name, JSON.stringify(data));
+};
+
+const getFromLs = (name) => {
+  return JSON.parse(localStorage.getItem(name) || null);
+};
 
 export const useLayout = (name, layout, enableAutoSave) => {
   const layoutName = `ws-widgets-manager-layout__${name}`;
-  const [layoutState, setLayoutState] = useState(layout);
+  const savedLayout = getFromLs(layoutName) || [];
+  const [layoutState, setLayoutState] = useState(
+    enableAutoSave && savedLayout.length ? savedLayout : layout
+  );
   const prevLayoutState = usePrev(layoutState);
   const prevPropsLayout = usePrev(layout);
 
   useEffect(() => {
-    const savedLayout = enableAutoSave ? getFromLs() : null;
-
-    //savedLayout && console.log("Saved layout: ", savedLayout);
-
-    savedLayout && updateLayout(savedLayout || layout);
     return () => {};
   }, []);
 
   useEffect(() => {
-    saveToLs(layout);
-    prevPropsLayout !== null && layout && updateLayout(layout);
+    const areEqual = areObjectArraysEqual(prevPropsLayout, layout);
+    if (areEqual) return;
+    //console.log('Savig changed layout');
+    
+    updateLayout(layout);
   }, [layout]);
 
   useEffect(() => {
-    prevLayoutState !== null && layoutState && saveToLs(layoutState);
+    /* console.log(
+      'layoutState changed: ',
+      prevLayoutState,
+      layoutState,
+      enableAutoSave
+    ); */
+
+    enableAutoSave && saveToLs(layoutName, layoutState);
   }, [layoutState]);
-
-  const saveToLs = (data) => {
-    enableAutoSave && localStorage.setItem(layoutName, JSON.stringify(data));
-  };
-
-  const getFromLs = () => {
-    return JSON.parse(localStorage.getItem(layoutName) || null);
-  };
 
   const updateLayout = (layout) => {
     //console.log("updating layout: ", layout);
-    //localStorage.setItem(layoutName, JSON.stringify(layout));
     setLayoutState(layout.map((l) => ({ ...l })));
     //setLayoutState(layout);
   };
@@ -48,7 +57,7 @@ export const useLayout = (name, layout, enableAutoSave) => {
 };
 
 export const usePrev = (value) => {
-  const prevValue = useRef(null);
+  const prevValue = useRef(value);
 
   useEffect(() => {
     prevValue.current = value;

@@ -2,22 +2,7 @@ import './App.css';
 import WidgetsManager from './components/WidgetsManager/WidgetsManager';
 import { map, range } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import GridItem from './components/WidgetsManager/GridItem/GridItem';
 import config from './config';
-
-const MockComponent = (props) => {
-  const renders = useRef(1);
-
-  useEffect(() => {
-    renders.current++;
-  });
-  return (
-    <div>
-      <div>{props.name || props.children}</div>
-      <div>Renders: {renders.current}</div>
-    </div>
-  );
-};
 
 const getLayout = () => {
   return map(range(0, 4), function (item, i) {
@@ -48,19 +33,6 @@ function App() {
   const [layout, setLayout] = useState(getLayout());
   const [selected, setSelected] = useState(0);
   const [increment, setIncrement] = useState(true);
-
-  const getWidget = useCallback(
-    (layout) => (
-      <MockComponent
-        key={layout.i}
-        title={`Component ${layout.i}`}
-        actions={[]}
-      >
-        <span>Widget {layout.i}</span>
-      </MockComponent>
-    ),
-    [layout]
-  );
 
   const changeLayoutX = () => {
     const rndLayout = layout[selected];
@@ -100,7 +72,7 @@ function App() {
 
   return (
     <div className='App'>
-      <label>{increment ? 'Increment' : 'Decrement'}</label>
+      {/* <label>{increment ? 'Increment' : 'Decrement'}</label>
       <input
         type='checkbox'
         checked={increment}
@@ -117,7 +89,7 @@ function App() {
       </select>
       <button onClick={changeLayoutX}>Change X</button>
       <button onClick={changeLayoutWidth}>Change W</button>
-      <button onClick={resetLayout}>Reset Layout</button>
+      <button onClick={resetLayout}>Reset Layout</button> */}
       <WidgetsManager
         name='WidgetsManager-1'
         layout={layout}

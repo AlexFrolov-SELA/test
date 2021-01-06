@@ -35,5 +35,6 @@ export const Content = styled.div`
 `;
 export const DragHandle = styled.div`
   flex: 1;
+  display: flex;
   cursor: grabbing;
 `;

@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import loadable from '@loadable/component';
 import { BsArrowsFullscreen } from 'react-icons/bs';
 import { VscChromeClose } from 'react-icons/vsc';
 import { Wrapper } from './styles';
+import ErrorBoundary from './ErrorBoundary';
 import GridItemHeader from './GridItemHeader';
 import GridItemContent from './GridItemContent';
+import LoadingWidget from './LoadingWidget';
 
 const GridItem = (props) => {
-  const { title, actions } = props;
+  const { title, actions, componentName } = props;
 
   const _actions = [
     ...actions,
@@ -23,10 +26,20 @@ const GridItem = (props) => {
     },
   ];
 
+  const Component = useMemo(() => {
+    return React.lazy(() => import(`./../../../${componentName}`));
+  }, [componentName]);
+
   return (
     <Wrapper className='grid-item'>
       <GridItemHeader title={title} actions={_actions} />
-      <GridItemContent>{props.children}</GridItemContent>
+      <GridItemContent>
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingWidget />}>
+            <Component />
+          </Suspense>
+        </ErrorBoundary>
+      </GridItemContent>
     </Wrapper>
   );
 };

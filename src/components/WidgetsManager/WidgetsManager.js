@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import GridLayout, { WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
@@ -13,7 +13,8 @@ const ResponsiveReactGridLayout = WidthProvider(GridLayout);
 
 const WidgetsManager = ({ children, ...props }) => {
   const { config, removeItem } = props;
-  const { name, flags } = config.manager;
+  const { manager, widgets } = config;
+  const { name, flags } = manager;
   const layout = useMemo(() => {
     return getLayoutFromConfig(config);
   }, [config]);
@@ -39,14 +40,15 @@ const WidgetsManager = ({ children, ...props }) => {
   });
 
   const onLayoutChange = (newLayout) => {
-    if (!prevLayoutState || fullScreen !== null) return;
+    //console.log(prevLayoutState);
+    //if (!prevLayoutState || fullScreen !== null) return;
 
     const areLayoutsEqual = areObjectArraysEqual(layoutState, newLayout);
 
-    //console.log("onLayoutChange fired");
+    //console.log('onLayoutChange fired: ', newLayout);
 
     if (!areLayoutsEqual) {
-      console.log('Layout changed');
+      //console.log('Layout changed');
       /* console.log(
         "onLayoutChange: ",
         newLayout,
@@ -65,52 +67,27 @@ const WidgetsManager = ({ children, ...props }) => {
     setFullscreen(value);
   };
 
-  const getGridItem = (child, key) => {
-    //console.log(child, key);
-    return (
-      <div key={key} className='grid-item-container'>
-        <GridItem
-          key={key}
-          title={child.props.title}
-          actions={child.props.actions}
-          setFullscreen={() => toggleFullscreen(key)}
-          removeItem={() => removeItem(key)}
-        >
-          {child}
-        </GridItem>
-      </div>
-    );
-  };
-
-  const augmentedLayout = useMemo(() => {
-    //console.log("calculating layout: ", layout, layoutState);
-    const filtered = layoutState.filter((item) =>
-      fullScreen !== null ? item.i === fullScreen : true
-    );
-
-    if (fullScreen) {
-      //console.log("Maximized: ", filtered);
-      return [{ ...filtered[0], x: 0, y: 0, w: 12, h: 6 }];
-    }
-
-    return filtered;
-  }, [fullScreen, layoutState]);
-
-  const filteredChildren = useMemo(() => {
-    //console.log("calculating children: ", children, augmentedLayout);
-    if (fullScreen !== null) {
-      const key = augmentedLayout[0].i;
-      const child = children.find((child) => child.key === key);
-      return [getGridItem(child, key)];
-    }
-    return children.map((child, idx) => {
-      const key = augmentedLayout[idx].i;
-      return getGridItem(child, key);
-    });
-  }, [fullScreen, layoutState]);
-
   //console.log("Renders: ", renders.current);
   //console.log("children: ", filteredChildren.length);
+
+  const gridItems = layoutState.map((widgetLayout) => {
+    const key = widgetLayout.i;
+    const widget = widgets.find((w) => w.layout.i === key);
+    const { layout, ...widgetProps } = widget;
+
+    return (
+      <div key={key} data-grid={widgetLayout} className='grid-item-container'>
+        <GridItem
+          key={key}
+          setFullscreen={() => toggleFullscreen(key)}
+          removeItem={() => removeItem(key)}
+          {...widgetProps}
+        ></GridItem>
+      </div>
+    );
+  });
+
+  //console.log('GridItems: ', gridItems);
 
   return (
     <Wrapper>
@@ -120,16 +97,16 @@ const WidgetsManager = ({ children, ...props }) => {
         /* autoSize={false}
         resizeHandles={['w', 'e', 's', 'se', 'sw']} */
         autoSize={config.manager.flags.autoSize || false}
-        layout={augmentedLayout}
+        /* layout={augmentedLayout} */
         compactType={config.manager.flags.compactType || 'vertical'}
         onLayoutChange={onLayoutChange}
       >
-        {filteredChildren}
+        {gridItems}
       </ResponsiveReactGridLayout>
       {/* <div style={{position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 3}}>
 
       </div> */}
-      {!filteredChildren.length && <NoWidgets />}
+      {!layoutState.length && <NoWidgets />}
     </Wrapper>
   );
 };

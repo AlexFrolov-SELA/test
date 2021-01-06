@@ -1,13 +1,14 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Title, Header, DragHandle, Actions } from "./styles";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Title, Header, DragHandle, Actions } from './styles';
 
 const GridItemHeader = (props) => {
   const { title, actions, meta } = props;
   return (
     <Header>
-      <Title>{title}</Title>
-      <DragHandle className="grid-item-drag-handle" />
+      <DragHandle className='grid-item-drag-handle'>
+        <Title>{title}</Title>
+      </DragHandle>
       <Actions>
         {actions.reverse().map((action, idx) => {
           const Icon = action.icon;
@@ -25,7 +26,7 @@ const GridItemHeader = (props) => {
 };
 
 GridItemHeader.defaultProps = {
-  title: "",
+  title: '',
   actions: [],
   meta: {},
 };
